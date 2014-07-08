@@ -1,5 +1,5 @@
 package lbfgs
 
 func Blah() int {
-  return 0
+	return 1
 }

@@ -1,13 +1,13 @@
 package lbfgs_test
 
 import (
-  . "github.com/igorbonadio/optimus/lbfgs"
-  . "github.com/onsi/ginkgo"
-  . "github.com/onsi/gomega"
+	. "github.com/igorbonadio/optimus/lbfgs"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Optimizer", func() {
-  It("...", func() {
-    Ω(Blah()).Should(Equal(0))
-  })
+	It("...", func() {
+		Ω(Blah()).Should(Equal(1))
+	})
 })

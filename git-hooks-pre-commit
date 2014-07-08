@@ -1,0 +1,11 @@
+#!/bin/sh
+git stash -q --keep-index
+status=0
+gofiles=$(find . -name '*.go')
+badfile=$(gofmt -l $gofiles)
+git stash pop -q
+if test -n "$badfile" ; then
+  echo "git pre-commit check failed: file needs gofmt: $badfile"
+  status=1
+fi
+exit $status
