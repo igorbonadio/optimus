@@ -1,6 +1,9 @@
 package lbfgs
 
-import "github.com/huichen/lbfgs"
+import (
+	"github.com/huichen/lbfgs"
+	"math"
+)
 
 type Optimizer struct {
 	f            ObjectiveFunction
@@ -26,6 +29,8 @@ func (optimizer *Optimizer) Min(initialX []float64) []float64 {
 	g := lbfgs.NewVector(len(initialX))
 	x.SetValues(optX)
 
+	fx := optimizer.f(SF32ToSF64(optX))
+
 	for k := 0; k < optimizer.maxIteration; k++ {
 		g.SetValues(SF64ToSF32(optimizer.df(SF32ToSF64(optX))))
 		delta := opt.GetDeltaX(x, g)
@@ -33,7 +38,8 @@ func (optimizer *Optimizer) Min(initialX []float64) []float64 {
 		for j := 0; j < len(optX); j++ {
 			optX[j] = x.Get(j)
 		}
-		if g.Norm() < float32(optimizer.epsilon) {
+		newFx := optimizer.f(SF32ToSF64(optX))
+		if g.Norm() < float32(optimizer.epsilon) || math.Abs((fx-newFx)/newFx) < optimizer.epsilon {
 			break
 		}
 	}
