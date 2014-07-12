@@ -1,7 +1,7 @@
 package lbfgs
 
 import (
-	"github.com/igorbonadio/lbfgs"
+	lbfgs "github.com/kho/liblbfgs/go"
 )
 
 type Optimizer struct {
@@ -19,29 +19,29 @@ func New(f ObjectiveFunction, df PartialDerivatives, m int, maxIteration int, ep
 	return &Optimizer{f: f, df: df, m: m, maxIteration: maxIteration, epsilon: epsilon}
 }
 
-func (optimizer *Optimizer) Min(initialX []float64) []float64 {
-	opt := lbfgs.NewOptimizer(optimizer.m, len(initialX))
-
-	optX := initialX
-
-	x := lbfgs.NewVector(len(initialX))
-	g := lbfgs.NewVector(len(initialX))
-	x.SetValues(optX)
-
-	optimizer.f(optX)
-
-	for k := 0; k < optimizer.maxIteration; k++ {
-		g.SetValues(optimizer.df(optX))
-		delta := opt.GetDeltaX(x, g)
-		x.Increment(delta, 1)
-		for j := 0; j < len(optX); j++ {
-			optX[j] = x.Get(j)
+func (optimizer *Optimizer) Min(x []float64) []float64 {
+	evaluate := func(x, g []lbfgs.Float, step lbfgs.Float) lbfgs.Float {
+		_x := make([]float64, len(x))
+		for i := 0; i < len(x); i++ {
+			_x[i] = float64(x[i])
 		}
-		optimizer.f(optX)
-		if g.Norm() < optimizer.epsilon /*|| math.Abs((fx-newFx)/newFx) < optimizer.epsilon*/ {
-			break
+		_g := optimizer.df(_x)
+		for i := 0; i < len(_g); i++ {
+			g[i] = lbfgs.Float(_g[i])
 		}
+		return lbfgs.Float(optimizer.f(_x))
 	}
 
-	return optX
+	_x := make([]lbfgs.Float, len(x))
+	for i := 0; i < len(x); i++ {
+		_x[i] = lbfgs.Float(x[i])
+	}
+
+	lbfgs.Minimize(_x, evaluate, lbfgs.Silent, &lbfgs.DefaultParam)
+
+	for i := 0; i < len(x); i++ {
+		x[i] = float64(_x[i])
+	}
+
+	return x
 }
